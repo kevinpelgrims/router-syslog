@@ -1,0 +1,9 @@
+services:
+  vector:
+    image: timberio/vector:latest-alpine
+    volumes:
+      - ./vector:/etc/vector
+    command: ["-c", "/etc/vector/vector.yaml"]
+    ports:
+      - '514:514/udp'
+    container_name: vector

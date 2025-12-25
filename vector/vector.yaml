@@ -1,0 +1,22 @@
+sources:
+  syslog_udp:
+    type: syslog
+    address: 0.0.0.0:514
+    mode: udp
+
+transforms:
+  remap_syslog:
+    inputs:
+      - syslog_udp
+    type: remap
+    source: |
+            structured = parse_syslog!(.message)
+            . = merge(., structured)
+
+sinks:
+  emit_syslog:
+    inputs:
+      - remap_syslog
+    type: console
+    encoding:
+      codec: json
