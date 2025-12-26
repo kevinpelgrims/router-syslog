@@ -1,22 +1,37 @@
 sources:
-  syslog_udp:
+  syslog:
     type: syslog
     address: 0.0.0.0:514
     mode: udp
 
 transforms:
+  # The time is incorrectly set to UTC, and it seems to be impossible to fix with
+  # timezone information, so instead we tweak the timestamp to be correct for UTC+1
+  # TODO: Take DST into account!
   remap_syslog:
     inputs:
-      - syslog_udp
+      - syslog
     type: remap
     source: |
-            structured = parse_syslog!(.message)
-            . = merge(., structured)
+        .timestamp = from_unix_timestamp!(to_unix_timestamp!(.timestamp) - 3600)
 
 sinks:
-  emit_syslog:
+  console:
     inputs:
       - remap_syslog
     type: console
     encoding:
       codec: json
+
+  loki:
+    inputs:
+      - remap_syslog
+    type: loki
+    endpoint: http://loki:3100
+    encoding:
+      codec: json
+    labels:
+      job: "syslog"
+      hostname: "{{ hostname }}"
+      severity: "{{ severity }}"
+      appname: "{{ appname }}"

@@ -7,3 +7,12 @@ services:
     ports:
       - '514:514/udp'
     container_name: vector
+    depends_on:
+      - loki
+
+  loki:
+    image: grafana/loki:latest
+    command: -config.file=/etc/loki/local-config.yaml
+    ports:
+      - "3100:3100"
+    container_name: loki
