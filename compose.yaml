@@ -18,12 +18,15 @@ services:
     command: -config.file=/etc/loki/local-config.yaml
     ports:
       - "3100:3100"
+    volumes:
+      - loki-data:/loki
     networks:
       - logging
 
   grafana:
     image: grafana/grafana:latest
     container_name: grafana
+    user: "472:472"
     ports:
       - "3000:3000"
     environment:
@@ -33,6 +36,7 @@ services:
       - GF_USERS_ALLOW_SIGN_UP=false
     volumes:
       - ./grafana/datasources.yaml:/etc/grafana/provisioning/datasources/datasources.yaml
+      - grafana-data:/var/lib/grafana
     depends_on:
       - loki
     networks:
@@ -41,3 +45,7 @@ services:
 networks:
   logging:
     driver: bridge
+
+volumes:
+  loki-data:
+  grafana-data:
