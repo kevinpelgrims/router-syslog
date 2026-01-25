@@ -32,10 +32,22 @@ This is a Docker Compose setup that receives syslog messages via Vector, stores 
 
 ## Architecture
 
-```
-Syslog (UDP:514) → Vector → Loki ← Grafana
-                      ↓
-                   Console
+```mermaid
+flowchart LR
+    subgraph Network
+        Router[Router]
+    end
+
+    subgraph Docker[Docker Compose Stack]
+        Vector[Vector]
+        Loki[(Loki)]
+        Grafana[Grafana]
+    end
+
+    Router -- "Syslog" --> Vector
+    Vector -- "Forward logs" --> Loki
+    Vector -- "Debug output" --> Console[Console]
+    Grafana -- "Query logs" --> Loki
 ```
 
 - **Vector** receives syslog messages, parses them, and forwards to both console and Loki
